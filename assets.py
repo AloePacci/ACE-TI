@@ -63,6 +63,12 @@ class Assets(object):
         self.icon_trash_log = self.include_image("icon_trash_log.png",40,40)
         self.icon_play = self.include_image("play.png",35,35)
         self.icon_pause = self.include_image("pause.png",35,35)
+        self.icon_ship = self.include_image("icon_ship.png",40,40)
+        self.image_ship = Image.open(self.path+"icon_ship.png").convert('RGBA').resize((60,60))
+        self.waste_len=2
+        self.icon_waste=[]
+        for i in range(self.waste_len):
+            self.icon_waste.append(self.include_image(f"waste{i}.png",40,40))
 
     def include_image(self,image,sizex,sizey):
         try:
