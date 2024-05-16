@@ -61,6 +61,8 @@ class Assets(object):
         self.aceti_icon = self.include_image("icon_aceti.png",40,40)
         self.icon_water_trash = self.include_image("icon_water_trash.png",40,40)
         self.icon_trash_log = self.include_image("icon_trash_log.png",40,40)
+        self.icon_play = self.include_image("play.png",35,35)
+        self.icon_pause = self.include_image("pause.png",35,35)
 
     def include_image(self,image,sizex,sizey):
         try:

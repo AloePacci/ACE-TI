@@ -77,10 +77,11 @@ class Table(tkinter.ttk.PanedWindow):
 
         self.table=data
         self.sheet.set_sheet_data(data=data)
+        self.sheet.set_index_data(self.dataframe.index)
 
         self.number_of_columns=len(headers)-1
 
-        self.sheet.set_all_cell_sizes_to_text()
+        self.sheet.set_all_column_widths(self.parent.screenwidth//(self.number_of_columns+2))
         
 
     def reset_Cell(self):

@@ -172,9 +172,10 @@ class ACETI_GUI(tkinter.Tk):
         if len(dfs) == 0:
             return False #return false as we were not able to load files
         
-        self.shared.rawdatabase = pd.concat(dfs)
-        self.shared.database=df[df.apply(lambda x: not math.isnan(x["Object Lon"]), axis=1)]
+        self.shared.rawdatabase = pd.concat(dfs,ignore_index=True)
+        self.shared.database=self.shared.rawdatabase[self.shared.rawdatabase['Object Lon'].notnull()]
         self.TRASHLOGTAB.table.update_database()
+        self.TRASHTAB.update_database()
         return True
 
 
