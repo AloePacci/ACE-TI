@@ -231,10 +231,13 @@ class TRASHTAB(tkinter.ttk.PanedWindow):
         self.map_widget.fit_bounding_box(self.topleft, self.bottomright)
 
     def update_database(self):
+        self.map_widget.delete_all_marker()
+        self.ships=[]
+        self.trashes=[]
         self.date_var.set(self.shared.rawdatabase.at[0,"Datetime"])
         self.timeline.config(to=len(self.shared.rawdatabase))
         self.playbuttom.config(state="normal")
         self.ships.append(SHIP("vehicle_1", self.shared.rawdatabase.at[0,"Drone Lat"], self.shared.rawdatabase.at[0,"Drone Lon"],parent=self))
-        self.ships[0].update_rotation(30)
+        self.ships[0].update_rotation(self.shared.rawdatabase.at[0,"Drone Heading"])
 
 

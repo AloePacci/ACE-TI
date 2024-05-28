@@ -6,6 +6,8 @@ import time
 import traceback
 import re
 from PIL import Image, ImageTk
+import requests
+from io import BytesIO
 import PIL.ImageTk
 from itertools import count
 from datetime import datetime
@@ -89,3 +91,8 @@ class Assets(object):
             base_path = os.path.abspath(".")
 
         return os.path.join(base_path, relative_path)
+    
+    def download_image(self, image):
+        baseurl="https://fontawesome.com/start"
+        response = requests.get(baseurl+"/"+image)
+        img = Image.open(BytesIO(response.content))
