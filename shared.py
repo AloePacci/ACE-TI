@@ -11,3 +11,11 @@ class SHARED():
     def __init__(self):
         self.rawdatabase=None
         self.database=None
+        self.Turbidity=tkinter.DoubleVar()
+        self.PH=tkinter.DoubleVar()
+        self.Battery=tkinter.DoubleVar()
+        self.Temperature=tkinter.DoubleVar()
+        self.Conductivity=tkinter.DoubleVar()
+        self.Sonar=tkinter.DoubleVar()
+        self.Date=tkinter.StringVar()
+        self.Date.set("                  ")

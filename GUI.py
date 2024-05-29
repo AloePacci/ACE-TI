@@ -19,6 +19,7 @@ from widgets.labels import *
 import pandas as pd
 from tabs.trashdetectiontab import TRASHTAB
 from tabs.trashdetectionlogtab import TRASHLOGTAB
+from tabs.gausian_process_tab import GAUSIANSENSORTAB
 import math
 # import machine this is for hard reset (machine.reset())
 version = "1.0.0"
@@ -73,6 +74,8 @@ class ACETI_GUI(tkinter.Tk):
         self.menubar_buttons.append(self.button_trash_detection)
         self.button_raw_trash_detection = tkinter.Button(self.toolbar, image=self.assets.icon_trash_log, command=lambda a=1: self.change_tab(a), width=40, height=40)
         self.menubar_buttons.append(self.button_raw_trash_detection)
+        self.button_gaussian_sensor = tkinter.Button(self.toolbar, image=self.assets.icon_gaussian_process, command=lambda a=2: self.change_tab(a), width=40, height=40)
+        self.menubar_buttons.append(self.button_gaussian_sensor)
 
         for i in self.menubar_buttons:
             i.pack(side='left', expand=False,)
@@ -90,8 +93,12 @@ class ACETI_GUI(tkinter.Tk):
         self.TRASHLOGTAB=TRASHLOGTAB(parent=self)
         self.tabs.append(self.TRASHLOGTAB)
 
+        #create gaussian sensor tab
+        self.GAUSIANSENSORTAB=GAUSIANSENSORTAB(parent=self)
+        self.tabs.append(self.GAUSIANSENSORTAB)
+
         #select init tab
-        self.change_tab(0)
+        self.change_tab(2)
 
         #MENU BAR
         menubar = tkinter.Menu(self)
