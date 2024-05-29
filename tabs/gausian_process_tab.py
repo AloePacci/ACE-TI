@@ -19,6 +19,7 @@ from shared import *
 from assets import *
 from widgets.ListboxEditable import ListboxEditable
 from widgets.labels import *
+from submodules.database import Database
 max_retain_data=40
 
 
@@ -60,16 +61,17 @@ class GAUSIANSENSORTAB(tkinter.ttk.PanedWindow):
             self.shared=SHARED()
 
         super().__init__(orient="horizontal")
+        self.database= Database()
 
-        self.trash_tab()
+        self.gs_tab()
 
-    def trash_tab(self):
+    def gs_tab(self):
         self.GPS_panel = tkinter.ttk.PanedWindow(orient="vertical")
         self.add(self.GPS_panel)
 
         
         #create map
-        self.map_widget = MAP_WITH_GAUSSIAN_MAP(parent= self,corner_radius=0, height=int(self.parent.screenheight*0.8)+1) #this widget has no automatic size
+        self.map_widget = MAP_WITH_GAUSSIAN_MAP(parent= self,corner_radius=0, height=int(self.parent.screenheight*0.75)+1) #this widget has no automatic size
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         self.GPS_panel.add(self.map_widget)
         # self.map_widget.pack_propagate(False)
@@ -100,7 +102,12 @@ class GAUSIANSENSORTAB(tkinter.ttk.PanedWindow):
         buttonsframe=tkinter.Frame(gps_data, height=1, borderwidth=1) #for date and play/center
         self.center_buttom = tkinter.Button(buttonsframe, text="Center", command=self.center_map, width=20, height=1,font=tkinter.font.Font(weight='bold', size=18))
         self.center_buttom.pack(side="left",expand="false",fill="y")
+        self.do_buttom = tkinter.Button(buttonsframe, text="do", command=self.test, width=20, height=1,font=tkinter.font.Font(weight='bold', size=18))
+        self.do_buttom.pack(side="left",expand="false",fill="y")
         buttonsframe.pack(side="right",expand="false",fill="y")
 
     def center_map(self,event=None):
         self.map_widget.fit_bounding_box(self.topleft, self.bottomright)
+
+    def test(self, event=None):
+        self.database.query()

@@ -125,7 +125,7 @@ class TRASHTAB(tkinter.ttk.PanedWindow):
 
         
         #create map
-        self.map_widget = TkinterMapView(corner_radius=0, height=int(self.parent.screenheight*0.8)+1) #this widget has no automatic size
+        self.map_widget = TkinterMapView(corner_radius=0, height=int(self.parent.screenheight*0.6)+1) #this widget has no automatic size
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         self.GPS_panel.add(self.map_widget)
         # self.map_widget.pack_propagate(False)

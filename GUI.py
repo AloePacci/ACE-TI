@@ -4,8 +4,6 @@ import tkinter.font
 import tkinter.ttk
 import os, sys, webbrowser, platform
 import signal
-import serial
-import serial.tools.list_ports
 import threading
 import time
 import screeninfo
@@ -20,6 +18,7 @@ import pandas as pd
 from tabs.trashdetectiontab import TRASHTAB
 from tabs.trashdetectionlogtab import TRASHLOGTAB
 from tabs.gausian_process_tab import GAUSIANSENSORTAB
+from tabs.mission_tab import MISSIONTAB
 import math
 # import machine this is for hard reset (machine.reset())
 version = "1.0.0"
@@ -28,17 +27,13 @@ class ACETI_GUI(tkinter.Tk):
     def __init__(self):
         self.platform=platform.system()
             #get platform
-
         super().__init__()
         #INIT SHAPE  todo:use customTK
         # customtkinter.set_appearance_mode("System")  # Modes: system (default), light, dark
         # customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
         self.title("ACETI GUI")
-        if self.platform == "Linux":
-            self.attributes('-zoomed', True)
-        else:
-            self.state('zoomed')
-            # elif platform.system() == “Windows”:
+        self.after(1000, self.rescale) #after init, scale window
+        # elif platform.system() == “Windows”:
         self.configure(bg = 'beige')
         self.option_add('*tearOff', False)  # Deshabilita submenús flotantes
 
@@ -48,6 +43,8 @@ class ACETI_GUI(tkinter.Tk):
         self.assets=Assets()
         self.shared=SHARED()
 
+        # self.toggle_fullscreen()
+        # self.toggle_fullscreen()
         #get screen size
         monitors = screeninfo.get_monitors()
         self.screenheight=monitors[0].height
@@ -76,6 +73,8 @@ class ACETI_GUI(tkinter.Tk):
         self.menubar_buttons.append(self.button_raw_trash_detection)
         self.button_gaussian_sensor = tkinter.Button(self.toolbar, image=self.assets.icon_gaussian_process, command=lambda a=2: self.change_tab(a), width=40, height=40)
         self.menubar_buttons.append(self.button_gaussian_sensor)
+        self.button_mission = tkinter.Button(self.toolbar, image=self.assets.icon_path_planning, command=lambda a=3: self.change_tab(a), width=40, height=40)
+        self.menubar_buttons.append(self.button_mission)
 
         for i in self.menubar_buttons:
             i.pack(side='left', expand=False,)
@@ -96,6 +95,10 @@ class ACETI_GUI(tkinter.Tk):
         #create gaussian sensor tab
         self.GAUSIANSENSORTAB=GAUSIANSENSORTAB(parent=self)
         self.tabs.append(self.GAUSIANSENSORTAB)
+
+        #create mission tab
+        self.MISSIONTAB = MISSIONTAB(parent=self)
+        self.tabs.append(self.MISSIONTAB)
 
         #select init tab
         self.change_tab(2)
@@ -143,6 +146,11 @@ class ACETI_GUI(tkinter.Tk):
     def dummy(self):
         pass
 
+    def rescale(self, event=None):
+        if self.platform == "Linux":
+            self.attributes('-zoomed', True)
+        else:
+            self.state('zoomed')
 
     def change_tab(self, tab):
         for i in range(len(self.menubar_buttons)):

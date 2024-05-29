@@ -3,3 +3,4 @@ build/
 dist/
 sqlbackups
 *.pyc
+pass.json
