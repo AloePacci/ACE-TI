@@ -5,6 +5,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+from datetime import datetime
+import threading
 import sys
 import utm
 from math import radians, cos, sin, sqrt, atan2
@@ -25,6 +27,7 @@ class Database():
         self.password=passw["password"]
         self.host=passw["host"]
         self.selected_map = selected_map
+        self.busy=False
 
         if self.selected_map == 'alamillo':
             map_folder=self.resource_path(f'assets/Maps')
@@ -36,11 +39,37 @@ class Database():
             # Binarize the image
             _, binary_image = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
             # Convert the binary image to 0s and 1s
-            self.scenario_map = np.where(binary_image > 0, 1, 0)
+            self.scenario_map = np.where(binary_image > 0, 1, 0).astype(float)
             # cargar imagen satelite
             self.satelite_img = plt.imread(f'{map_folder}/{self.selected_map.capitalize()}Sat.png')
+            #get map shape
+            rows, cols = self.scenario_map.shape
+            self.res_lat, self.res_lon = (self.map_coords['lat_max'] - self.map_coords['lat_min']) / rows, (self.map_coords['lon_max'] - self.map_coords['lon_min']) / cols
+            
+
 
     def query(self, date='2024-02-27'):
+        #execute in a thread
+        start=datetime.now()
+        querythread=threading.Thread(target=self.__query,args=(date,))
+        self.busy=True
+        querythread.start()
+        querythread.join()
+        afterquery=datetime.now()
+        difference = afterquery - start
+        seconds_in_day = 24 * 60 * 60
+        aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
+        print(f"query delayed {aux[0]} minutes {aux[1]} seconds")
+        gp_thread=threading.Thread(target=self.obtain_prediction_maps)
+        gp_thread.start()
+        gp_thread.join()
+        aftergp=datetime.now()
+        difference = aftergp - start
+        aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
+        print(f"gp delayed {aux[0]} minutes {aux[1]} seconds")
+
+
+    def __query(self, date='2024-02-27'):
         self.date=date
         cnx = mysql.connector.connect(user=self.user, password=self.password, port="6006",
                                     host=self.host, database='wqp')
@@ -87,6 +116,7 @@ class Database():
         self.df.to_csv(f'sql_data/wqp_{self.date}.csv', index=False)
 
         print(self.df)
+        self.busy=False
 
 
         # # WQPs de mediciones
@@ -255,7 +285,7 @@ class Database():
             plt.title(f'{nombre_dict[sensor]} del Lago Mayor (Parque del Alamillo)')
 
         plt.savefig(f'./{nombre_dict[sensor]}_{self.selected_map}.pdf', format='pdf')
-        plt.show()
+        # plt.show()
 
     def plot_uncertainty(self, uncertainty_map, sensor):
         non_water_mask = self.scenario_map == 0
@@ -271,7 +301,7 @@ class Database():
         if self.selected_map == 'alamillo':
             plt.title(f'Desviación típica de {nombre_dict[sensor]}')
         plt.savefig(f'./{nombre_dict[sensor]}_{self.selected_map}_std.pdf', format='pdf')
-        plt.show()
+        # plt.show()
 
     def haversine(self, lat1, lon1, lat2, lon2):
         # Radio de la Tierra en kilómetros
