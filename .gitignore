@@ -4,3 +4,4 @@ dist/
 sqlbackups
 *.pyc
 pass.json
+outs/

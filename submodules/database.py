@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 import threading
 import sys
+import PIL
 import utm
 from math import radians, cos, sin, sqrt, atan2
 import matplotlib.pyplot as plt
@@ -283,9 +284,59 @@ class Database():
         if self.selected_map == 'alamillo':
             # plt.text(1950, 650, unidades_dict[sensor], fontsize=12, rotation=90, ha='center', va='center', color='k')
             plt.title(f'{nombre_dict[sensor]} del Lago Mayor (Parque del Alamillo)')
-
-        plt.savefig(f'./{nombre_dict[sensor]}_{self.selected_map}.pdf', format='pdf')
+        if(not os.path.exists("outs")):
+            os.makedirs("outs")
+        savepath=self.resource_path(f"outs/{nombre_dict[sensor]}_{self.selected_map}.pdf")
+        plt.savefig(savepath, format='pdf')
         # plt.show()
+
+
+
+    def create_map(self, mean_map, sensor, x, y):
+        fig, axis = plt.subplots()
+        # Punto de despliegue
+        # plt.text(350, 1100, 'Punto de despliegue', fontsize=9, rotation=0, ha='center', va='center', color='w')
+        # plt.scatter(175, 1050, c='r', s=50, marker='X', zorder=2)
+        plt.xticks([])
+        plt.yticks([])
+
+        # Contorno
+        cs_internos = plt.contour(mean_map, colors='black', alpha=0.7, linewidths=0.7, zorder=1)
+        cs_externo = plt.contour(mean_map, colors='black', alpha=1, linewidths=1.7, zorder=1)
+
+        cs_internos.collections[0].remove()
+        for i in range(1, len(cs_externo.collections)):
+            cs_externo.collections[i].remove()
+        plt.clabel(cs_internos, inline=1, fontsize=3.5)
+
+        # Mapa y puntos de muestreo
+        plt.scatter(x, y, c='black', s=1, marker='.', alpha=0.5)
+        # vmin_dict = {'Sonar': 2, 'Conductivity': 2.29, 'PH': 7.48, 'Temperature': 17.1, 'Turbidity': 30}
+        # vmax_dict = {'Sonar': 0.5, 'Conductivity': 2.14, 'PH': 7.16, 'Temperature': 14.50, 'Turbidity': 15}
+        # plt.imshow(mean_map, cmap='viridis', alpha=1, origin='upper', vmin=vmin_dict[sensor], vmax=vmax_dict[sensor])
+        vmin = np.min(mean_map[mean_map > 0])
+        vmax = np.max(mean_map[mean_map > 0])
+        plt.imshow(mean_map, cmap='viridis', alpha=1, origin='upper', vmin=vmin, vmax=vmax)
+
+        # Recortar el mapa
+        if self.selected_map == 'alamillo':
+            plt.ylim(1150, 200)
+
+        # Leyendas
+        unidades_dict = {'Sonar': 'Profundidad (m)', 'Conductivity': 'Conductividad (mS/cm)', 'PH': 'pH', 'Temperature': 'Temperatura (ºC)', 'Turbidity': 'Turbidez (NTU)'}
+        nombre_dict = {'Sonar': 'Batimetría', 'Conductivity': 'Conductividad', 'PH': 'pH', 'Temperature': 'Temperatura', 'Turbidity': 'Turbidez'}
+        plt.colorbar(shrink=0.65).set_label(label=unidades_dict[sensor],size=12)#,weight='bold')
+        if self.selected_map == 'alamillo':
+            # plt.text(1950, 650, unidades_dict[sensor], fontsize=12, rotation=90, ha='center', va='center', color='k')
+            plt.title(f'{nombre_dict[sensor]} del Lago Mayor (Parque del Alamillo)')
+        # if(not os.path.exists("outs")):
+        #     os.makedirs("outs")
+        # savepath=self.resource_path(f"outs/{nombre_dict[sensor]}_{self.selected_map}.pdf")
+        # plt.savefig(savepath, format='pdf')
+        # plt.show()
+
+        self.image_to_tk=PIL.Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
+        
 
     def plot_uncertainty(self, uncertainty_map, sensor):
         non_water_mask = self.scenario_map == 0
@@ -300,7 +351,10 @@ class Database():
         nombre_dict = {'Sonar': 'Batimetría', 'Conductivity': 'Conductividad', 'PH': 'pH', 'Temperature': 'Temperatura', 'Turbidity': 'Turbidez'}
         if self.selected_map == 'alamillo':
             plt.title(f'Desviación típica de {nombre_dict[sensor]}')
-        plt.savefig(f'./{nombre_dict[sensor]}_{self.selected_map}_std.pdf', format='pdf')
+        if(not os.path.exists("outs")):
+            os.makedirs("outs")
+        savepath=self.resource_path(f"outs/{nombre_dict[sensor]}_{self.selected_map}_std.pdf")
+        plt.savefig(savepath, format='pdf')
         # plt.show()
 
     def haversine(self, lat1, lon1, lat2, lon2):
@@ -340,8 +394,9 @@ class Database():
         # Obtener todos los mapas de predicción
         for sensor in self.sensors: # ['Conductivity', 'PH', 'Sonar', 'Temperature', 'Turbidity']
             mean_map, uncertainty_map, x, y = self.get_gp(sensor)
-            self.plot_mean(mean_map, sensor, x, y)
-            self.plot_uncertainty(uncertainty_map, sensor)
+            # self.plot_mean(mean_map, sensor, x, y)
+            # self.plot_uncertainty(uncertainty_map, sensor)
+            self.create_map(mean_map, sensor, x, y)
     
     def resource_path(self, relative_path):
         """ Get absolute path to resource, works for dev and for PyInstaller """

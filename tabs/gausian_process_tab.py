@@ -43,6 +43,13 @@ class MAP_WITH_GAUSSIAN_MAP(TkinterMapView):
         self.canvas.lift("gaussian_proccess")
         super().manage_z_order()
 
+    def change_image(self):
+        self.canvas.delete(self.GAUSSIAN_IMAGE)
+        self.GAUSSIAN_IMAGE = self.canvas.create_image(10, 10,
+                                                        anchor="nw",
+                                                        image=self.assets.icon_test_big,
+                                                        tag="gaussian_proccess")
+
 
 
 
@@ -69,7 +76,6 @@ class GAUSIANSENSORTAB(tkinter.ttk.PanedWindow):
         self.GPS_panel = tkinter.ttk.PanedWindow(orient="vertical")
         self.add(self.GPS_panel)
 
-        
         #create map
         self.map_widget = MAP_WITH_GAUSSIAN_MAP(parent= self,corner_radius=0, height=int(self.parent.screenheight*0.75)+1) #this widget has no automatic size
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
@@ -111,3 +117,9 @@ class GAUSIANSENSORTAB(tkinter.ttk.PanedWindow):
 
     def test(self, event=None):
         self.database.query()
+        self.database.image_to_tk.format = "PNG"
+        self.database.image_to_tk.show()
+        self.assets.icon_test_big=ImageTk.PhotoImage(self.database.image_to_tk)
+        self.map_widget.change_image()
+
+        
