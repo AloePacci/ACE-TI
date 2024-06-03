@@ -17,7 +17,7 @@ from widgets.labels import *
 import pandas as pd
 from tabs.trashdetectiontab import TRASHTAB
 from tabs.trashdetectionlogtab import TRASHLOGTAB
-from tabs.gausian_process_tab import GAUSIANSENSORTAB
+from tabs.gausian_process_tab_nomap import GAUSIANSENSORTAB
 from tabs.mission_tab import MISSIONTAB
 import math
 # import machine this is for hard reset (machine.reset())

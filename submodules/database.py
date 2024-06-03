@@ -19,7 +19,8 @@ import colorcet
 sys.path.append('../')
 
 class Database():
-    def __init__(self,selected_map = 'alamillo'):
+    def __init__(self, parent, selected_map = 'alamillo'):
+        self.parent=parent
         self.sensors=['Conductivity', 'PH', 'Sonar', 'Temperature', 'Turbidity']
         self.password_path=self.resource_path("pass.json")
         with open(self.password_path,encoding="utf-8") as f:
@@ -29,6 +30,7 @@ class Database():
         self.host=passw["host"]
         self.selected_map = selected_map
         self.busy=False
+        self.sensor_maps={}
 
         if self.selected_map == 'alamillo':
             map_folder=self.resource_path(f'assets/Maps')
@@ -50,24 +52,27 @@ class Database():
 
 
     def query(self, date='2024-02-27'):
-        #execute in a thread
-        start=datetime.now()
-        querythread=threading.Thread(target=self.__query,args=(date,))
-        self.busy=True
-        querythread.start()
-        querythread.join()
-        afterquery=datetime.now()
-        difference = afterquery - start
-        seconds_in_day = 24 * 60 * 60
-        aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
-        print(f"query delayed {aux[0]} minutes {aux[1]} seconds")
-        gp_thread=threading.Thread(target=self.obtain_prediction_maps)
-        gp_thread.start()
-        gp_thread.join()
-        aftergp=datetime.now()
-        difference = aftergp - start
-        aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
-        print(f"gp delayed {aux[0]} minutes {aux[1]} seconds")
+        if not self.busy:
+            #execute in a thread
+            # start=datetime.now()
+            querythread=threading.Thread(target=self.__query,args=(date,))
+            self.busy=True
+            querythread.start()
+            # afterquery=datetime.now()
+            # difference = afterquery - start
+            # seconds_in_day = 24 * 60 * 60
+            # aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
+            # print(f"query delayed {aux[0]} minutes {aux[1]} seconds")
+    def generate_gp(self, sensor = "Conductivity"):
+        if not self.busy:
+            gp_thread=threading.Thread(target=self.obtain_prediction_maps,args=(sensor,))
+            self.busy=True
+            gp_thread.start()
+            # gp_thread.join()
+            # aftergp=datetime.now()
+            # difference = aftergp - start
+            # aux=divmod(difference.days * seconds_in_day + difference.seconds, 60)
+            # print(f"gp delayed {aux[0]} minutes {aux[1]} seconds")
 
 
     def __query(self, date='2024-02-27'):
@@ -292,8 +297,15 @@ class Database():
 
 
 
-    def create_map(self, mean_map, sensor, x, y):
-        fig, axis = plt.subplots()
+    def create_map(self, sensor):
+        try:
+            mean_map=self.sensor_maps[sensor][0]
+            x=self.sensor_maps[sensor][2]
+            y=self.sensor_maps[sensor][3]
+        except:
+            return
+        plt.clf()
+        # fig, axis = plt.subplots()
         # Punto de despliegue
         # plt.text(350, 1100, 'Punto de despliegue', fontsize=9, rotation=0, ha='center', va='center', color='w')
         # plt.scatter(175, 1050, c='r', s=50, marker='X', zorder=2)
@@ -334,9 +346,6 @@ class Database():
         # savepath=self.resource_path(f"outs/{nombre_dict[sensor]}_{self.selected_map}.pdf")
         # plt.savefig(savepath, format='pdf')
         # plt.show()
-
-        self.image_to_tk=PIL.Image.frombytes('RGB', fig.canvas.get_width_height(),fig.canvas.tostring_rgb())
-        
 
     def plot_uncertainty(self, uncertainty_map, sensor):
         non_water_mask = self.scenario_map == 0
@@ -390,14 +399,16 @@ class Database():
 
         return row_idx, col_idx
     
-    def obtain_prediction_maps(self):
+    def obtain_prediction_maps(self,_sensor="Conductivity"):
         # Obtener todos los mapas de predicción
         for sensor in self.sensors: # ['Conductivity', 'PH', 'Sonar', 'Temperature', 'Turbidity']
+            self.sensor_maps[sensor]=self.get_gp(sensor)
             mean_map, uncertainty_map, x, y = self.get_gp(sensor)
             # self.plot_mean(mean_map, sensor, x, y)
             # self.plot_uncertainty(uncertainty_map, sensor)
-            self.create_map(mean_map, sensor, x, y)
-    
+            if sensor == _sensor:
+                self.create_map(sensor)
+        self.busy=False
     def resource_path(self, relative_path):
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
