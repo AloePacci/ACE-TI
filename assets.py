@@ -67,6 +67,8 @@ class Assets(object):
         self.icon_pause = self.include_image("pause.png",35,35)
         self.icon_ship = self.include_image("icon_ship.png",40,40)
         self.icon_gaussian_process = self.include_image("icon_gaussian.png",40,40)
+        self.icon_on = self.include_image("on.png",40,20)
+        self.icon_off = self.include_image("off.png",40,20)
         self.icon_path_planning = self.include_image("icon_path_planning.png",40,40)
         self.icon_test_big = self.include_image("icon_gaussian.png",400,400)
 

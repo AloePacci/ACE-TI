@@ -111,14 +111,35 @@ class GAUSIANSENSORTAB(tkinter.ttk.PanedWindow):
             aux.pack(side="top")
             self.checkboxes.append(aux)
         self.checkboxes[0].check()
-        #day=datetime.now()y
+
+        self.do_playback=True
+        self.playback_frame=tkinter.Frame(self.map_selection)
+        self.playback_button = tkinter.Button(self.playback_frame, image = self.assets.icon_on, bd = 0, command = self.playback_data)
+        self.playback_label=tkinter.Label(self.playback_frame, text="Now")
+        self.playback_label.pack(side="left", anchor="e")
+        self.playback_button.pack(side="left", pady = 50, anchor="w")
+        self.playback_frame.pack(side="top", fill="x")
+
+        #calendar
+        self.playback_selector_frame=tkinter.Frame(self.map_selection)
+        #day=datetime.now()
         day = datetime.strptime("2024-02-27", '%Y-%m-%d')
-        cal = Calendar(self.map_selection, selectmode = 'day',
+        cal = Calendar(self.playback_selector_frame, selectmode = 'day',
                year = day.year, month = day.month,
                day = day.day)
  
         cal.pack(pady = 20, expand="false",fill="none")
+        self.playback_selector_frame.pack()
 
+    def playback_data(self, event=None):
+        self.do_playback = not self.do_playback
+        #TODO: change to data from specific date or now
+        if self.do_playback:
+            self.playback_selector_frame.pack()
+            self.playback_button.config(image=self.assets.icon_on)
+        else:
+            self.playback_button.config(image=self.assets.icon_off)
+            self.playback_selector_frame.pack_forget()
 
     def gp_loop(self, event=None):
         if self.gp_step==0 and not self.busy: #query new data
